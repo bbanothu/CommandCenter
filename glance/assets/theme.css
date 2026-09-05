@@ -1,0 +1,68 @@
+/* CommandCenter — command-center skin for Glance.
+   Loaded via theme.custom-css-file. Safe to hack on; nothing here is load-bearing. */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --ccc-accent: hsl(35 95% 62%);
+  --ccc-line: hsla(35, 95%, 62%, 0.22);
+  --ccc-grid: hsla(35, 95%, 62%, 0.035);
+}
+
+body {
+  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background-image:
+    linear-gradient(var(--ccc-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ccc-grid) 1px, transparent 1px);
+  background-size: 42px 42px;
+  background-attachment: fixed;
+}
+
+/* Uppercase, tracked-out widget headers with a hairline rule */
+.widget-header {
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--ccc-line);
+}
+.widget-header::before {
+  content: "▚ ";
+  color: var(--ccc-accent);
+  opacity: 0.7;
+}
+
+/* Accent glow on highlighted text */
+.color-highlight {
+  text-shadow: 0 0 9px hsla(35, 95%, 62%, 0.35);
+}
+
+/* Big, confident clock */
+.widget-type-clock .clock-time,
+.widget-type-clock time {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* Framed iframe so CasaOS reads as a "screen" */
+.widget-type-iframe iframe {
+  border-radius: 6px;
+  border: 1px solid var(--ccc-line);
+}
+
+/* Tighten the container grid */
+.widget-type-docker-containers .container-icon { filter: saturate(0.85); }
+
+/* Faint CRT scanlines over everything (drop this block if it bugs your eyes) */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 2px,
+    hsla(0, 0%, 0%, 0.05) 2px 4px
+  );
+}

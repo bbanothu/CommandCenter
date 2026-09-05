@@ -1,0 +1,38 @@
+# Installed to /etc/systemd/system/commandcenter-kiosk.service by setup.sh
+# (placeholders __USER__ / __CHROMIUM__ / __URL__ are substituted at install time).
+
+[Unit]
+Description=CommandCenter kiosk (Chromium via cage)
+After=network-online.target seatd.service
+Wants=network-online.target
+Conflicts=getty@tty1.service
+After=getty@tty1.service
+
+[Service]
+User=__USER__
+PAMName=login
+TTYPath=/dev/tty1
+StandardInput=tty
+StandardOutput=journal
+StandardError=journal
+
+Environment=XDG_RUNTIME_DIR=/run/user/%U
+Environment=WLR_LIBINPUT_NO_DEVICES=1
+
+# Wait for the dashboard to answer before painting anything.
+ExecStartPre=/bin/sh -c 'until curl -sf __URL__ >/dev/null 2>&1; do sleep 2; done'
+
+ExecStart=/usr/bin/cage -- __CHROMIUM__ \
+  --kiosk --app=__URL__ \
+  --noerrdialogs --disable-infobars --disable-session-crashed-bubble \
+  --incognito --no-first-run --fast --fast-start \
+  --disable-features=Translate,TranslateUI \
+  --check-for-update-interval=31536000 \
+  --overscroll-history-navigation=0 \
+  --autoplay-policy=no-user-gesture-required
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

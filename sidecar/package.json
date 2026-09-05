@@ -1,0 +1,15 @@
+{
+  "name": "commandcenter-sidecar",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Feeds Google Calendar + Gmail to the Glance dashboard as JSON.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "googleapis": "^144.0.0",
+    "node-ical": "^0.20.1"
+  }
+}

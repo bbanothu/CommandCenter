@@ -1,0 +1,47 @@
+# CommandCenter — Glance dashboard + a small sidecar for Google Calendar / Gmail.
+# Deploy on the same Pi that runs CasaOS.  `docker compose up -d`
+#
+# Add it to CasaOS afterwards via "Custom Install / Import Compose" if you want
+# it to show up in the CasaOS app grid, or just leave it running via compose.
+
+services:
+  glance:
+    image: glanceapp/glance:latest
+    container_name: commandcenter-glance
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    pid: host                       # so server-stats sees the host, not the container
+    volumes:
+      - ./glance/glance.yml:/app/config/glance.yml:ro
+      - ./glance/assets:/app/assets:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro   # docker-containers widget
+      - /:/host:ro,rslave                              # host metrics for server-stats
+    environment:
+      - TZ=${TZ:-UTC}
+      - WEATHER_LOCATION=${WEATHER_LOCATION}
+      - WEATHER_UNITS=${WEATHER_UNITS:-metric}
+      - CASAOS_URL=${CASAOS_URL}
+      - CPU_TEMP_SENSOR=${CPU_TEMP_SENSOR:-}
+      # gopsutil reads host stats through these when pid:host + /host mount are set
+      - HOST_PROC=/host/proc
+      - HOST_SYS=/host/sys
+      - HOST_ETC=/host/etc
+      - HOST_MOUNT_PREFIX=/host
+    depends_on:
+      - sidecar
+
+  sidecar:
+    build: ./sidecar
+    container_name: commandcenter-sidecar
+    restart: unless-stopped
+    expose:
+      - "3000"
+    environment:
+      - TZ=${TZ:-UTC}
+      - GOOGLE_ICAL_URL=${GOOGLE_ICAL_URL:-}
+      - GCAL_LOOKAHEAD_DAYS=${GCAL_LOOKAHEAD_DAYS:-14}
+      - GMAIL_CLIENT_ID=${GMAIL_CLIENT_ID:-}
+      - GMAIL_CLIENT_SECRET=${GMAIL_CLIENT_SECRET:-}
+      - GMAIL_REFRESH_TOKEN=${GMAIL_REFRESH_TOKEN:-}
+      - GMAIL_QUERY=${GMAIL_QUERY:-is:unread in:inbox}
