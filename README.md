@@ -73,6 +73,28 @@ restarts on crash.
 
 ---
 
+## Calendar in the iframe
+
+The big center panel is a Google Calendar **embed** (`GCAL_EMBED_URL`). Get the URL
+from Calendar → *Settings* → your calendar → *Integrate calendar* → **Embed code**
+(copy the `src="..."` value), or build it:
+`https://calendar.google.com/calendar/embed?src=<CAL_ID>&ctz=<TZ>&mode=MONTH`.
+
+A Google Calendar embed only renders if **one** of these is true:
+
+1. **The calendar is public** — Calendar settings → *Access permissions* → "Make
+   available to public". Simplest for a wall display; a dedicated "Home" calendar
+   you share to the family keeps your work calendar out of it.
+2. **The kiosk browser is signed into Google** — log the Pi's Chromium into the
+   account once. Private calendars then render, but the session can lapse.
+3. **Skip the embed** — the left-column **Agenda** panel already lists your next
+   events from the private secret-iCal feed (no Google login, fully private). If
+   that's enough, point `GCAL_EMBED_URL` at anything (or ask to swap the iframe
+   for a bigger agenda / a self-hosted month grid).
+
+The **Agenda** panel (`GOOGLE_ICAL_URL`) is independent of all this and always
+uses the private feed.
+
 ## Gmail setup (optional)
 
 The sidecar reads Gmail with an OAuth **refresh token** (app passwords are being

@@ -61,9 +61,12 @@ pages:
       # ── CENTER ──────────────────────────────────────────────────────────
       - size: full
         widgets:
+          # Google Calendar embed. See README "Calendar in the iframe" — the
+          # calendar must be public OR the kiosk browser signed into Google,
+          # otherwise this frame renders empty.
           - type: iframe
-            source: ${CASAOS_URL}
-            height: 420
+            source: ${GCAL_EMBED_URL}
+            height: 620
 
           - type: split-column
             max-columns: 2
@@ -89,13 +92,20 @@ pages:
               - title: CasaOS
                 url: ${CASAOS_URL}
                 icon: si:homeassistantcommunitystore
-              - title: Dashboard
-                url: http://localhost:8080
-                icon: si:grafana
               # Add your own, e.g.:
               # - title: Jellyfin
               #   url: http://192.168.1.10:8096
               #   icon: si:jellyfin
+
+          - type: bookmarks
+            title: Quick Access
+            groups:
+              - links:
+                  - title: CasaOS
+                    url: ${CASAOS_URL}
+                    icon: si:homeassistantcommunitystore
+                  - title: Full Calendar
+                    url: https://calendar.google.com
 
       # ── RIGHT ───────────────────────────────────────────────────────────
       - size: small

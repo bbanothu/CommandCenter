@@ -22,6 +22,7 @@ services:
       - WEATHER_LOCATION=${WEATHER_LOCATION}
       - WEATHER_UNITS=${WEATHER_UNITS:-metric}
       - CASAOS_URL=${CASAOS_URL}
+      - GCAL_EMBED_URL=${GCAL_EMBED_URL}
       - CPU_TEMP_SENSOR=${CPU_TEMP_SENSOR:-}
       # gopsutil reads host stats through these when pid:host + /host mount are set
       - HOST_PROC=/host/proc
