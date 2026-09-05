@@ -135,23 +135,6 @@ pages:
                 </ul>
               {{ end }}
 
-          # Glance's native `todo` widget is unreleased as of v0.8.6, and the
-          # `html` widget renders raw source with no card/header — so we draw the
-          # whole widget shell by hand here. Edit the <li> list to taste, or swap
-          # this for a `bookmarks` widget / a custom-api pointed at a task backend.
-          - type: html
-            source: |
-              <div class="widget widget-type-html">
-                <div class="widget-header"><h2 class="uppercase">Tasks</h2></div>
-                <div class="widget-content">
-                  <ul class="list list-gap-10 ccc-tasks">
-                    <li><input type="checkbox"> <span>Back up CasaOS config</span></li>
-                    <li><input type="checkbox"> <span>Update containers</span></li>
-                    <li><input type="checkbox"> <span>Check disk usage</span></li>
-                  </ul>
-                </div>
-              </div>
-
           - type: rss
             title: News
             style: vertical-list

@@ -60,7 +60,3 @@ body::after {
     hsl(0 0% 0% / 0.06) 2px 4px
   );
 }
-
-/* The hand-rolled Tasks widget (see glance.yml html widget) */
-.ccc-tasks li { display: flex; gap: 10px; align-items: center; }
-.ccc-tasks input { accent-color: hsl(var(--ccc-accent)); }
