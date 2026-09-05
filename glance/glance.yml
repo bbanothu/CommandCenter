@@ -14,7 +14,7 @@ theme:
   negative-color: 5 78 62
   contrast-multiplier: 1.15
   text-saturation-multiplier: 0.9
-  custom-css-file: /app/assets/theme.css
+  custom-css-file: /assets/theme.css
 
 pages:
   - name: Command Center
@@ -112,7 +112,7 @@ pages:
                   <span class="size-h1 color-highlight">{{ .JSON.Int "unread" }}</span>
                   <span class="color-base">unread</span>
                 </div>
-                <ul class="list list-gap-12">
+                <ul class="list list-gap-14">
                   {{ range .JSON.Array "messages" }}
                     <li>
                       <div class="color-highlight text-truncate">{{ .String "subject" }}</div>
@@ -125,9 +125,22 @@ pages:
                 </ul>
               {{ end }}
 
-          - type: todo
-            title: Tasks
-            id: command-center
+          # Glance's native `todo` widget is unreleased as of v0.8.6, and the
+          # `html` widget renders raw source with no card/header — so we draw the
+          # whole widget shell by hand here. Edit the <li> list to taste, or swap
+          # this for a `bookmarks` widget / a custom-api pointed at a task backend.
+          - type: html
+            source: |
+              <div class="widget widget-type-html">
+                <div class="widget-header"><h2 class="uppercase">Tasks</h2></div>
+                <div class="widget-content">
+                  <ul class="list list-gap-10 ccc-tasks">
+                    <li><input type="checkbox"> <span>Back up CasaOS config</span></li>
+                    <li><input type="checkbox"> <span>Update containers</span></li>
+                    <li><input type="checkbox"> <span>Check disk usage</span></li>
+                  </ul>
+                </div>
+              </div>
 
           - type: rss
             title: News

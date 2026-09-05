@@ -1,12 +1,12 @@
-/* CommandCenter — command-center skin for Glance.
+/* CommandCenter — command-center skin for Glance (tested against v0.8.6).
    Loaded via theme.custom-css-file. Safe to hack on; nothing here is load-bearing. */
 
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 :root {
-  --ccc-accent: hsl(35 95% 62%);
-  --ccc-line: hsla(35, 95%, 62%, 0.22);
-  --ccc-grid: hsla(35, 95%, 62%, 0.035);
+  --ccc-accent: 35 95% 62%;
+  --ccc-line: hsl(35 95% 62% / 0.28);
+  --ccc-grid: hsl(35 95% 62% / 0.06);
 }
 
 body {
@@ -14,46 +14,40 @@ body {
   background-image:
     linear-gradient(var(--ccc-grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--ccc-grid) 1px, transparent 1px);
-  background-size: 42px 42px;
+  background-size: 44px 44px;
+  background-position: -1px -1px;
   background-attachment: fixed;
 }
 
-/* Uppercase, tracked-out widget headers with a hairline rule */
-.widget-header {
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 0.72rem;
-  padding-bottom: 7px;
-  border-bottom: 1px solid var(--ccc-line);
+/* Widget titles: amber, tracked-out, with a leading bar and a hairline rule */
+.widget-header > h2 {
+  color: hsl(var(--ccc-accent));
+  letter-spacing: 0.18em;
+  font-size: 0.74rem;
+  padding: 0 0 7px 12px;
+  border-left: 3px solid hsl(var(--ccc-accent));
+  text-shadow: 0 0 10px hsl(var(--ccc-accent) / 0.4);
 }
-.widget-header::before {
-  content: "▚ ";
-  color: var(--ccc-accent);
-  opacity: 0.7;
+.widget-header {
+  border-bottom: 1px solid var(--ccc-line);
+  padding-bottom: 0;
+  margin-bottom: 1.1rem;
 }
 
-/* Accent glow on highlighted text */
-.color-highlight {
-  text-shadow: 0 0 9px hsla(35, 95%, 62%, 0.35);
-}
+/* Accent glow on highlighted values */
+.color-highlight { text-shadow: 0 0 9px hsl(var(--ccc-accent) / 0.35); }
 
 /* Big, confident clock */
-.widget-type-clock .clock-time,
-.widget-type-clock time {
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
+.widget-type-clock [data-date] { letter-spacing: 0.04em; font-weight: 600; }
 
 /* Framed iframe so CasaOS reads as a "screen" */
-.widget-type-iframe iframe {
+.widget-type-iframe iframe,
+iframe {
   border-radius: 6px;
   border: 1px solid var(--ccc-line);
 }
 
-/* Tighten the container grid */
-.widget-type-docker-containers .container-icon { filter: saturate(0.85); }
-
-/* Faint CRT scanlines over everything (drop this block if it bugs your eyes) */
+/* Faint CRT scanlines over everything — delete this block if it bugs your eyes */
 body::after {
   content: "";
   position: fixed;
@@ -63,6 +57,10 @@ body::after {
   background: repeating-linear-gradient(
     to bottom,
     transparent 0 2px,
-    hsla(0, 0%, 0%, 0.05) 2px 4px
+    hsl(0 0% 0% / 0.06) 2px 4px
   );
 }
+
+/* The hand-rolled Tasks widget (see glance.yml html widget) */
+.ccc-tasks li { display: flex; gap: 10px; align-items: center; }
+.ccc-tasks input { accent-color: hsl(var(--ccc-accent)); }
