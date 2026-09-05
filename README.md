@@ -105,12 +105,18 @@ retired). One-time:
 3. **OAuth consent screen** → *External* → add your own email as a **test user**.
 4. **Credentials → Create credentials → OAuth client ID → Desktop app**. Copy the
    client ID and secret into `.env`.
-5. Get a refresh token: [OAuth 2.0 Playground](https://developers.google.com/oauthplayground)
-   → gear icon → *Use your own OAuth credentials* → paste ID/secret → in the left
-   list authorize scope `https://www.googleapis.com/auth/gmail.readonly` →
-   *Exchange authorization code for tokens* → copy the **refresh token** into
-   `GMAIL_REFRESH_TOKEN`.
+   Use client type **Desktop app**.
+5. Get a refresh token — run the helper (any machine with Node 18+ and a browser):
+   ```bash
+   node sidecar/get-refresh-token.mjs <CLIENT_ID> <CLIENT_SECRET>
+   ```
+   Open the URL it prints, approve read-only Gmail access, and it prints
+   `GMAIL_REFRESH_TOKEN=...` — paste that into `.env` along with the ID/secret.
 6. `docker compose up -d` — the **Inbox** widget populates within a few minutes.
+
+   *No refresh token from the OAuth Playground?* Google only issues one on the
+   first consent per client. The helper above forces a fresh consent every run,
+   so use it instead.
 
 Tune what counts with `GMAIL_QUERY` (any Gmail search, e.g.
 `is:unread in:inbox -category:promotions`).
