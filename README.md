@@ -1,22 +1,22 @@
 # CommandCenter
 
 A full-screen wall dashboard for a Raspberry Pi running CasaOS — Google Calendar,
-Gmail, container health, host stats, weather, tasks and news in one view.
+Gmail, container health, host stats, weather and news in one view.
 
 ```
 ┌──────────────┬────────────────────────────────┬──────────────┐
-│  clock       │      CasaOS  (live iframe)      │  inbox       │
-│  weather     ├───────────────┬────────────────┤  tasks       │
-│  agenda      │  containers   │  pi stats      │  news        │
-│              ├───────────────┴────────────────┤              │
-│              │      services up / down        │              │
+│  clock       │                                │  inbox       │
+│  weather     │   Google Calendar (embed)      │              │
+│  containers  │                                │  news        │
+│              ├────────────────────────────────┤              │
+│              │  pi stats · services · links   │              │
 └──────────────┴────────────────────────────────┴──────────────┘
 ```
 
 **Stack:** [Glance](https://github.com/glanceapp/glance) does the layout and most
-widgets. A ~200-line Node **sidecar** covers Glance's two gaps — Google Calendar
-*events* and Gmail — by exposing them as JSON that Glance's `custom-api` widget
-renders. Both run as containers on the Pi. Chromium runs full-screen via `cage`.
+widgets. A small Node **sidecar** covers Glance's Gmail gap by exposing unread
+mail as JSON for a `custom-api` widget. Both run as containers on the Pi.
+Chromium runs full-screen via `cage`.
 
 ---
 
@@ -28,14 +28,15 @@ $EDITOR .env
 ```
 
 Minimum to get a useful screen: `TZ`, `WEATHER_LOCATION`, `CASAOS_URL`,
-`GOOGLE_ICAL_URL`. Everything else is optional.
+`GCAL_EMBED_URL`. Everything else is optional.
 
 - **`CASAOS_URL`** — use the Pi's LAN IP (`http://192.168.1.x`), not `localhost`,
-  since the kiosk browser loads that iframe too.
-- **`GOOGLE_ICAL_URL`** — Google Calendar → *Settings* → pick the calendar →
-  *Integrate calendar* → **Secret address in iCal format**. Read-only, no OAuth.
+  since the kiosk browser reaches it too.
+- **`GCAL_EMBED_URL`** — see "Calendar in the iframe" below.
 - **`CPU_TEMP_SENSOR`** — `cat /sys/class/thermal/thermal_zone*/type` on the Pi.
   Usually `cpu_thermal`.
+- **`GMAIL_*`** — optional, see "Gmail setup".
+- `GOOGLE_ICAL_URL` is only used if you re-add an Agenda widget; leave it blank.
 
 ## 2. Run the dashboard
 
@@ -58,6 +59,7 @@ On the Pi itself (Raspberry Pi OS Bookworm Lite, which is what CasaOS installs o
 cd CommandCenter
 DASH_URL=http://localhost:8080 ./kiosk/setup.sh
 sudo reboot          # for the console-blanking change
+./kiosk/google-login.sh   # one-time: sign into Google so the calendar shows
 ```
 
 After reboot the monitor boots straight into the dashboard. Useful commands:
@@ -75,25 +77,25 @@ restarts on crash.
 
 ## Calendar in the iframe
 
-The big center panel is a Google Calendar **embed** (`GCAL_EMBED_URL`). Get the URL
-from Calendar → *Settings* → your calendar → *Integrate calendar* → **Embed code**
-(copy the `src="..."` value), or build it:
-`https://calendar.google.com/calendar/embed?src=<CAL_ID>&ctz=<TZ>&mode=MONTH`.
+The center panel is a Google Calendar **embed** (`GCAL_EMBED_URL`), built as:
+`https://calendar.google.com/calendar/embed?src=<CAL_ID>&ctz=<TZ>&mode=MONTH`
+(`<CAL_ID>` is usually your Gmail address, URL-encoded — `you%40gmail.com`).
 
-A Google Calendar embed only renders if **one** of these is true:
+A private calendar's embed only renders when the **display's browser is signed
+into Google**. The kiosk service uses a persistent Chromium profile
+(`~/.commandcenter-chrome`, no `--incognito`) so the login sticks across reboots.
+Sign in once, on the Pi with keyboard + mouse:
 
-1. **The calendar is public** — Calendar settings → *Access permissions* → "Make
-   available to public". Simplest for a wall display; a dedicated "Home" calendar
-   you share to the family keeps your work calendar out of it.
-2. **The kiosk browser is signed into Google** — log the Pi's Chromium into the
-   account once. Private calendars then render, but the session can lapse.
-3. **Skip the embed** — the left-column **Agenda** panel already lists your next
-   events from the private secret-iCal feed (no Google login, fully private). If
-   that's enough, point `GCAL_EMBED_URL` at anything (or ask to swap the iframe
-   for a bigger agenda / a self-hosted month grid).
+```bash
+./kiosk/google-login.sh
+```
 
-The **Agenda** panel (`GOOGLE_ICAL_URL`) is independent of all this and always
-uses the private feed.
+That stops the kiosk, opens a normal Chromium window on the kiosk's profile —
+sign into your Google account, close the window, and the kiosk restarts with the
+calendar populated. If the session ever lapses (rare), run it again.
+
+The embed will **not** show in a logged-out browser, so don't expect it to render
+when you're just spot-checking `:8088` from your laptop.
 
 ## Gmail setup (optional)
 
@@ -145,10 +147,12 @@ CRT scanlines.
 ## Layout
 
 ```
-docker-compose.yml     glance + sidecar
-glance/glance.yml      widgets & layout
-glance/assets/         theme.css, fonts
-sidecar/server.js      /calendar.json, /mail.json
-kiosk/setup.sh         installs the Chromium kiosk service on the Pi
-kiosk/kiosk.service    the systemd unit it installs
+docker-compose.yml       glance + sidecar
+glance/glance.yml        widgets & layout
+glance/assets/           theme.css, fonts
+sidecar/server.js        /mail.json (and an unused /calendar.json)
+sidecar/get-refresh-token.mjs   one-time Gmail OAuth helper
+kiosk/setup.sh           installs the Chromium kiosk service on the Pi
+kiosk/kiosk.service      the systemd unit it installs
+kiosk/google-login.sh    one-time Google sign-in for the calendar embed
 ```

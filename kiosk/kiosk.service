@@ -22,10 +22,13 @@ Environment=WLR_LIBINPUT_NO_DEVICES=1
 # Wait for the dashboard to answer before painting anything.
 ExecStartPre=/bin/sh -c 'until curl -sf __URL__ >/dev/null 2>&1; do sleep 2; done'
 
+# NOT --incognito: the persistent profile below keeps the Google sign-in that
+# the calendar embed needs. Do the one-time login with kiosk/google-login.sh.
 ExecStart=/usr/bin/cage -- __CHROMIUM__ \
   --kiosk --app=__URL__ \
+  --user-data-dir=%h/.commandcenter-chrome \
   --noerrdialogs --disable-infobars --disable-session-crashed-bubble \
-  --incognito --no-first-run --fast --fast-start \
+  --no-first-run --fast --fast-start \
   --disable-features=Translate,TranslateUI \
   --check-for-update-interval=31536000 \
   --overscroll-history-navigation=0 \
