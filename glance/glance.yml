@@ -49,40 +49,13 @@ pages:
             source: ${GCAL_EMBED_URL}
             height: 620
 
-          - type: split-column
-            max-columns: 2
-            widgets:
-              - type: custom-api
-                title: Agenda
-                cache: 5m
-                url: http://sidecar:3000/calendar.json
-                template: |
-                  {{ if eq (len (.JSON.Array "events")) 0 }}
-                    <p class="color-paragraph">No events in the next two weeks.</p>
-                    {{ if .JSON.String "note" }}<p class="size-h6 color-negative">{{ .JSON.String "note" }}</p>{{ end }}
-                  {{ else }}
-                    <ul class="list list-gap-14">
-                      {{ range .JSON.Array "events" }}
-                        <li>
-                          <div class="flex justify-between items-center gap-10">
-                            <span class="color-highlight text-truncate">{{ .String "summary" }}</span>
-                            <span class="size-h6 color-base shrink-0">{{ .String "dayLabel" }}</span>
-                          </div>
-                          <div class="size-h6 color-paragraph">
-                            {{ .String "startLabel" }}{{ if .String "location" }} · {{ .String "location" }}{{ end }}
-                          </div>
-                        </li>
-                      {{ end }}
-                    </ul>
-                  {{ end }}
-
-              - type: server-stats
-                title: Raspberry Pi
-                servers:
-                  - type: local
-                    name: pi
-                    cpu-temp-sensor: ${CPU_TEMP_SENSOR}
-                    hide-swap: true
+          - type: server-stats
+            title: Raspberry Pi
+            servers:
+              - type: local
+                name: pi
+                cpu-temp-sensor: ${CPU_TEMP_SENSOR}
+                hide-swap: true
 
           - type: monitor
             title: Services
