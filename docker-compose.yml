@@ -13,8 +13,11 @@ services:
       - "${GLANCE_PORT:-8080}:8080"
     pid: host                       # so server-stats sees the host, not the container
     volumes:
-      - ./glance/glance.yml:/app/config/glance.yml:ro
-      - ./glance/assets:/app/assets:ro
+      # Mount the whole dir, NOT the single glance.yml file. A single-file bind
+      # mount is pinned to the file's inode, so an editor's atomic save (write
+      # temp + rename) swaps the inode and the container is stuck on the old
+      # content forever — hot reload silently dies. A directory mount is immune.
+      - ./glance:/app/config:ro                        # holds glance.yml + assets/
       - /var/run/docker.sock:/var/run/docker.sock:ro   # docker-containers widget
       - /:/host:ro,rslave                              # host metrics for server-stats
     environment:

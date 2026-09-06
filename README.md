@@ -1,16 +1,15 @@
 # CommandCenter
 
 A full-screen wall dashboard for a Raspberry Pi running CasaOS — Google Calendar,
-Gmail, container health, host stats, weather and news in one view.
+Gmail, container health, host stats and weather in one view.
 
 ```
 ┌──────────────┬────────────────────────────────┬──────────────┐
-│  refresh      │                               │  inbox       │
-│  clock        │                               │              │
-│  weather      │   Google Calendar (embed)     │  news        │
-│  containers   │                               │              │
-│              ├────────────────────────────────┤              │
-│              │  pi stats · services · links   │              │
+│  clock  ⚙     │                               │  inbox       │
+│  weather      │                               │  pi stats    │
+│  containers   │   Google Calendar (embed)     │  services    │
+│              │                                │  quick access │
+│              │                                │              │
 └──────────────┴────────────────────────────────┴──────────────┘
 ```
 
@@ -47,11 +46,15 @@ docker compose up -d --build
 ```
 
 Open `http://<pi-ip>:8080` from any browser to check it before going full-screen.
-Edit `glance/glance.yml` and it hot-reloads; edit `.env` and re-run
-`docker compose up -d`.
+Edit `glance/glance.yml` and it hot-reloads. Editing `glance/assets/theme.css`
+does **not** trigger a reload on its own (Glance only watches the YAML) — run
+`touch glance/glance.yml` after a CSS change to force one, then reload the browser.
+Edit `.env` and re-run `docker compose up -d`.
 
-Add your real services to the **Services** monitor block and the **News** feeds in
-`glance/glance.yml`.
+> The `glance/` directory is bind-mounted as a whole (not the single `glance.yml`
+> file) so that editor atomic-saves don't sever the mount and kill hot reload.
+
+Add your real services to the **Services** monitor block in `glance/glance.yml`.
 
 ## 3. Kiosk mode on the Pi
 

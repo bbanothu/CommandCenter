@@ -4,7 +4,7 @@
 server:
   host: 0.0.0.0
   port: 8080
-  assets-path: /app/assets
+  assets-path: /app/config/assets
 
 theme:
   # Phosphor-amber on near-black. Tweak freely, or use the on-screen picker.
@@ -26,11 +26,12 @@ pages:
       # ── LEFT ────────────────────────────────────────────────────────────
       - size: small
         widgets:
-          # Manual page reload — the kiosk has no keyboard. Sits just above the clock.
+          # Manual page reload — the kiosk has no keyboard. Renders as a small
+          # cog that theme.css floats onto the clock's top line (see .widget-type-html).
           - type: html
             hide-header: true
             source: |
-              <button type="button" class="cc-refresh" onclick="location.reload()">&#8635; Refresh</button>
+              <button type="button" class="cc-refresh" title="Refresh" aria-label="Refresh" onclick="location.reload()">&#9881;</button>
 
           - type: clock
             hour-format: 24h
@@ -77,9 +78,38 @@ pages:
           # Google Calendar embed. Renders now that the calendar is shared
           # publicly (Calendar settings → Access permissions for events). Set
           # that to "See all event details" for titles, not just "busy".
+          # Owns the center column alone now, so it runs tall.
           - type: iframe
             source: ${GCAL_EMBED_URL}
-            height: 620
+            height: 1000
+
+      # ── RIGHT ───────────────────────────────────────────────────────────
+      - size: small
+        widgets:
+          - type: custom-api
+            title: Inbox
+            cache: 5m
+            url: http://sidecar:3000/mail.json
+            template: |
+              {{ if .JSON.String "note" }}
+                <p class="size-h6 color-paragraph">{{ .JSON.String "note" }}</p>
+              {{ else }}
+                <div class="flex items-center justify-between margin-bottom-15">
+                  <span class="size-h1 color-highlight">{{ .JSON.Int "unread" }}</span>
+                  <span class="color-base">unread</span>
+                </div>
+                <ul class="list list-gap-14">
+                  {{ range .JSON.Array "messages" }}
+                    <li>
+                      <div class="color-highlight text-truncate">{{ .String "subject" }}</div>
+                      <div class="size-h6 color-paragraph flex justify-between gap-10">
+                        <span class="text-truncate">{{ .String "from" }}</span>
+                        <span class="shrink-0">{{ .String "date" }}</span>
+                      </div>
+                    </li>
+                  {{ end }}
+                </ul>
+              {{ end }}
 
           - type: server-stats
             title: Raspberry Pi
@@ -111,43 +141,3 @@ pages:
                     icon: si:homeassistantcommunitystore
                   - title: Full Calendar
                     url: https://calendar.google.com
-
-      # ── RIGHT ───────────────────────────────────────────────────────────
-      - size: small
-        widgets:
-          - type: custom-api
-            title: Inbox
-            cache: 5m
-            url: http://sidecar:3000/mail.json
-            template: |
-              {{ if .JSON.String "note" }}
-                <p class="size-h6 color-paragraph">{{ .JSON.String "note" }}</p>
-              {{ else }}
-                <div class="flex items-center justify-between margin-bottom-15">
-                  <span class="size-h1 color-highlight">{{ .JSON.Int "unread" }}</span>
-                  <span class="color-base">unread</span>
-                </div>
-                <ul class="list list-gap-14">
-                  {{ range .JSON.Array "messages" }}
-                    <li>
-                      <div class="color-highlight text-truncate">{{ .String "subject" }}</div>
-                      <div class="size-h6 color-paragraph flex justify-between gap-10">
-                        <span class="text-truncate">{{ .String "from" }}</span>
-                        <span class="shrink-0">{{ .String "date" }}</span>
-                      </div>
-                    </li>
-                  {{ end }}
-                </ul>
-              {{ end }}
-
-          - type: rss
-            title: News
-            style: vertical-list
-            limit: 12
-            collapse-after: 6
-            cache: 30m
-            feeds:
-              - url: https://feeds.arstechnica.com/arstechnica/index
-                title: Ars Technica
-              - url: https://hnrss.org/frontpage
-                title: Hacker News
