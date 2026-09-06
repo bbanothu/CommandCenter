@@ -24,6 +24,7 @@ services:
       - CASAOS_URL=${CASAOS_URL}
       - GCAL_EMBED_URL=${GCAL_EMBED_URL}
       - CPU_TEMP_SENSOR=${CPU_TEMP_SENSOR:-}
+      - SIDECAR_PUBLIC_URL=${SIDECAR_PUBLIC_URL:-http://localhost:3000}
       # gopsutil reads host stats through these when pid:host + /host mount are set
       - HOST_PROC=/host/proc
       - HOST_SYS=/host/sys
@@ -36,8 +37,13 @@ services:
     build: ./sidecar
     container_name: commandcenter-sidecar
     restart: unless-stopped
-    expose:
-      - "3000"
+    ports:
+      # Published so the kiosk browser can hit the "rerun" endpoint directly.
+      - "${SIDECAR_PORT:-3000}:3000"
+    volumes:
+      # Containers widget: list containers and restart one. Read-write (restart
+      # is a write) — this is a root-equivalent socket, keep the port on the LAN.
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - TZ=${TZ:-UTC}
       - GOOGLE_ICAL_URL=${GOOGLE_ICAL_URL:-}

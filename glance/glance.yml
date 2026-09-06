@@ -26,6 +26,12 @@ pages:
       # ── LEFT ────────────────────────────────────────────────────────────
       - size: small
         widgets:
+          # Manual page reload — the kiosk has no keyboard. Sits just above the clock.
+          - type: html
+            hide-header: true
+            source: |
+              <button type="button" class="cc-refresh" onclick="location.reload()">&#8635; Refresh</button>
+
           - type: clock
             hour-format: 24h
 
@@ -34,17 +40,43 @@ pages:
             units: ${WEATHER_UNITS}
             hour-format: 24h
 
-          - type: docker-containers
+          # Containers list from the sidecar (Glance's native docker-containers
+          # widget has no actions). Each row shows a status dot and a "rerun"
+          # button that POSTs a restart to the sidecar — SIDECAR_PUBLIC_URL must
+          # be the sidecar's address as the kiosk browser sees it (the Pi's IP).
+          - type: custom-api
             title: Containers
-            hide-by-default: false
-            running-only: false
+            cache: 10s
+            url: http://sidecar:3000/containers.json
+            template: |
+              {{ if .JSON.String "note" }}
+                <p class="size-h6 color-paragraph">{{ .JSON.String "note" }}</p>
+              {{ else }}
+                <ul class="list list-gap-10">
+                  {{ range .JSON.Array "containers" }}
+                    <li class="flex items-center justify-between gap-10">
+                      <div class="min-width-0">
+                        <div class="color-highlight text-truncate">{{ .String "name" }}</div>
+                        <div class="size-h6 color-paragraph text-truncate">{{ .String "status" }}</div>
+                      </div>
+                      <div class="flex items-center gap-10 shrink-0">
+                        <span
+                          class="{{ if .Bool "running" }}color-positive{{ else }}color-negative{{ end }}"
+                          title="{{ .String "state" }}">&#9679;</span>
+                        <button type="button" class="cc-rerun" data-name="{{ .String "name" }}"
+                          onclick="(function(b){var n=b.dataset.name;b.disabled=true;b.dataset.label=b.textContent;b.textContent='…';fetch('${SIDECAR_PUBLIC_URL}/containers/'+encodeURIComponent(n)+'/restart',{method:'POST'}).then(function(r){return r.json()}).then(function(j){if(j.ok){b.textContent='✓';setTimeout(function(){location.reload()},2000)}else{throw new Error()}}).catch(function(){b.textContent='✕';setTimeout(function(){b.textContent=b.dataset.label;b.disabled=false},2500)})})(this)">rerun</button>
+                      </div>
+                    </li>
+                  {{ end }}
+                </ul>
+              {{ end }}
 
       # ── CENTER ──────────────────────────────────────────────────────────
       - size: full
         widgets:
-          # Google Calendar embed. See README "Calendar in the iframe" — the
-          # calendar must be public OR the kiosk browser signed into Google,
-          # otherwise this frame renders empty.
+          # Google Calendar embed. Renders now that the calendar is shared
+          # publicly (Calendar settings → Access permissions for events). Set
+          # that to "See all event details" for titles, not just "busy".
           - type: iframe
             source: ${GCAL_EMBED_URL}
             height: 620

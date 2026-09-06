@@ -5,17 +5,19 @@ Gmail, container health, host stats, weather and news in one view.
 
 ```
 ┌──────────────┬────────────────────────────────┬──────────────┐
-│  clock       │                                │  inbox       │
-│  weather     │   Google Calendar (embed)      │              │
-│  containers  │                                │  news        │
+│  refresh      │                               │  inbox       │
+│  clock        │                               │              │
+│  weather      │   Google Calendar (embed)     │  news        │
+│  containers   │                               │              │
 │              ├────────────────────────────────┤              │
 │              │  pi stats · services · links   │              │
 └──────────────┴────────────────────────────────┴──────────────┘
 ```
 
 **Stack:** [Glance](https://github.com/glanceapp/glance) does the layout and most
-widgets. A small Node **sidecar** covers Glance's Gmail gap by exposing unread
-mail as JSON for a `custom-api` widget. Both run as containers on the Pi.
+widgets. A small Node **sidecar** covers the gaps — unread Gmail as JSON, and a
+container list with a per-container **rerun** (restart) button — for `custom-api`
+widgets. Both run as containers on the Pi.
 Chromium runs full-screen via `cage`.
 
 ---
@@ -133,6 +135,22 @@ Glance has an on-screen picker (top right) for live tweaking; paste the result
 back into the config. Delete the `body::after` block in `theme.css` to drop the
 CRT scanlines.
 
+## Containers widget
+
+The left-column **Containers** list comes from the sidecar (`/containers.json`),
+not Glance's native `docker-containers` widget, so each row can carry a **rerun**
+button that restarts that container in place.
+
+- The sidecar mounts `/var/run/docker.sock` **read-write** (restart is a write) —
+  that socket is root-equivalent, so its port (`SIDECAR_PORT`, default `3000`) is
+  published to the LAN only. Don't expose it to the internet.
+- **`SIDECAR_PUBLIC_URL`** must be the sidecar's address *as the kiosk browser
+  sees it* — the Pi's LAN IP, e.g. `http://192.168.1.10:3000` — because the rerun
+  button fetches it from the browser. `localhost` only works when you're viewing
+  the dashboard on the Pi itself.
+- Restarts are limited to containers currently in the list; the endpoint makes no
+  other Docker calls.
+
 ## Notes / gotchas
 
 - **CasaOS in an iframe** — if the center panel is blank, CasaOS is sending
@@ -150,7 +168,7 @@ CRT scanlines.
 docker-compose.yml       glance + sidecar
 glance/glance.yml        widgets & layout
 glance/assets/           theme.css, fonts
-sidecar/server.js        /mail.json (and an unused /calendar.json)
+sidecar/server.js        /mail.json, /calendar.json, /containers.json (+ restart)
 sidecar/get-refresh-token.mjs   one-time Gmail OAuth helper
 kiosk/setup.sh           installs the Chromium kiosk service on the Pi
 kiosk/kiosk.service      the systemd unit it installs

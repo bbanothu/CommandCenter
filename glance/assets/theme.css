@@ -47,6 +47,44 @@ iframe {
   border: 1px solid var(--ccc-line);
 }
 
+/* Refresh button pinned above the clock (top-left). The html widget with
+   hide-header renders its source bare, so this sits directly in the column. */
+.cc-refresh {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.6rem;
+  font: inherit;
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: hsl(var(--ccc-accent));
+  background: hsl(var(--ccc-accent) / 0.06);
+  border: 1px solid var(--ccc-line);
+  border-radius: 5px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.cc-refresh:hover { background: hsl(var(--ccc-accent) / 0.16); }
+.cc-refresh:active { background: hsl(var(--ccc-accent) / 0.24); }
+
+/* "rerun" button in the Containers widget */
+.cc-rerun {
+  font: inherit;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--ccc-accent));
+  background: transparent;
+  border: 1px solid var(--ccc-line);
+  border-radius: 4px;
+  padding: 2px 7px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.cc-rerun:hover:not(:disabled) { background: hsl(var(--ccc-accent) / 0.14); }
+.cc-rerun:disabled { opacity: 0.55; cursor: default; }
+
 /* Faint CRT scanlines over everything — delete this block if it bugs your eyes */
 body::after {
   content: "";
